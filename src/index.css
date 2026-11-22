@@ -1,0 +1,75 @@
+/* ==========================================================
+   Estilos globales – Task Manager
+   Usa Tailwind CSS v4 con @import
+   ========================================================== */
+@import "tailwindcss";
+
+/* Variables de color (modo claro por defecto) */
+:root {
+  --color-bg:          #f8f9fa;
+  --color-surface:     #ffffff;
+  --color-surface-2:   #f1f3f5;
+  --color-border:      #e2e8f0;
+  --color-text:        #1a202c;
+  --color-text-muted:  #64748b;
+  --color-accent:      #4f46e5;
+  --color-accent-soft: #eef2ff;
+
+  /* Colores por estado */
+  --color-pendiente:    #94a3b8;
+  --color-progreso:     #3b82f6;
+  --color-revision:     #f59e0b;
+  --color-completado:   #22c55e;
+}
+
+/* Modo oscuro (class-based) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --color-bg:          #0f172a;
+  --color-surface:     #1e293b;
+  --color-surface-2:   #263045;
+  --color-border:      #334155;
+  --color-text:        #f1f5f9;
+  --color-text-muted:  #94a3b8;
+  --color-accent:      #818cf8;
+  --color-accent-soft: #1e1b4b;
+}
+
+/* Reset base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  min-height: 100vh;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
