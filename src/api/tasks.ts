@@ -1,26 +1,32 @@
 // ============================================================
-// API – Tareas
+// API – Tareas (respaldo en memoria RAM para Cloudflare)
 // ============================================================
 import apiClient from './client';
+import { memoryStore } from './memoryStore';
 import type { Tarea, TareaDetalle, Estado } from '../types';
 
 export const tasksApi = {
-  // GET /api/tasks?userId=&estado=
   getAll: async (userId?: string, estado?: string): Promise<Tarea[]> => {
-    const params: Record<string, string> = {};
-    if (userId) params.userId = userId;
-    if (estado) params.estado = estado;
-    const { data } = await apiClient.get<Tarea[]>('/tasks', { params });
-    return data;
+    try {
+      const params: Record<string, string> = {};
+      if (userId) params.userId = userId;
+      if (estado) params.estado = estado;
+      const { data } = await apiClient.get<Tarea[]>('/tasks', { params, timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.getTasks(userId, estado);
+    }
   },
 
-  // GET /api/tasks/:id → tarea + comentarios + categorias
   getOne: async (id: string): Promise<TareaDetalle> => {
-    const { data } = await apiClient.get<TareaDetalle>(`/tasks/${id}`);
-    return data;
+    try {
+      const { data } = await apiClient.get<TareaDetalle>(`/tasks/${id}`, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.getTaskOne(id);
+    }
   },
 
-  // POST /api/tasks
   create: async (body: {
     nombre: string;
     descripcion?: string;
@@ -28,11 +34,14 @@ export const tasksApi = {
     fecha_entrega?: string;
     id_asignado: string;
   }): Promise<Tarea> => {
-    const { data } = await apiClient.post<Tarea>('/tasks', body);
-    return data;
+    try {
+      const { data } = await apiClient.post<Tarea>('/tasks', body, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.createTask(body);
+    }
   },
 
-  // PATCH /api/tasks/:id — solo los campos permitidos
   update: async (
     id: string,
     body: Partial<{
@@ -44,21 +53,31 @@ export const tasksApi = {
       id_asignado: string;
     }>
   ): Promise<Tarea> => {
-    const { data } = await apiClient.patch<Tarea>(`/tasks/${id}`, body);
-    return data;
+    try {
+      const { data } = await apiClient.patch<Tarea>(`/tasks/${id}`, body, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.updateTask(id, body);
+    }
   },
 
-  // POST /api/tasks/:id/categories → asociar categoría existente
   addCategory: async (id_tarea: string, id_categoria: string) => {
-    const { data } = await apiClient.post(`/tasks/${id_tarea}/categories`, {
-      id_categoria,
-    });
-    return data;
+    try {
+      const { data } = await apiClient.post(`/tasks/${id_tarea}/categories`, {
+        id_categoria,
+      }, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.addTaskCategory(id_tarea, id_categoria);
+    }
   },
 
-  // GET /api/tasks/:id/categories/available
   getAvailableCategories: async (id_tarea: string) => {
-    const { data } = await apiClient.get(`/tasks/${id_tarea}/categories/available`);
-    return data;
+    try {
+      const { data } = await apiClient.get(`/tasks/${id_tarea}/categories/available`, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.getAvailableCategories(id_tarea);
+    }
   },
 };

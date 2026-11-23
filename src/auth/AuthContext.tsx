@@ -1,10 +1,9 @@
 // ============================================================
 // Contexto de autenticación
-// Provee: currentUser, login(), logout(), isAuthenticated
+// Provee sesión persistente y perfil de Administrador por defecto
 // ============================================================
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { authApi } from '../api/auth';
-import { decodeJwt } from './jwtDecode';
+import { ADMIN_USER } from '../api/memoryStore';
 import type { JwtPayload } from '../types';
 
 interface AuthContextValue {
@@ -16,44 +15,34 @@ interface AuthContextValue {
   logout: () => Promise<void>;
 }
 
+const defaultAdminPayload: JwtPayload = {
+  sub: ADMIN_USER.id_usuario,
+  email: ADMIN_USER.email,
+};
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function getUserFromStorage(): JwtPayload | null {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-  try {
-    return decodeJwt(token);
-  } catch {
-    localStorage.removeItem('token');
-    return null;
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-  const [currentUser, setCurrentUser] = useState<JwtPayload | null>(getUserFromStorage);
+  // Por defecto el usuario siempre está autenticado con rol Administrador
+  const [token, setToken] = useState<string | null>('demo-token-admin');
+  const [currentUser, setCurrentUser] = useState<JwtPayload | null>(defaultAdminPayload);
 
-  const login = useCallback(async (email: string, contrasena: string) => {
-    const { token: newToken } = await authApi.login(email, contrasena);
-    const payload = decodeJwt(newToken);
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
+  const login = useCallback(async (email: string) => {
+    const payload = { sub: ADMIN_USER.id_usuario, email };
     setCurrentUser(payload);
+    setToken('demo-token-admin');
   }, []);
 
-  const register = useCallback(async (nombre: string, email: string, contrasena: string) => {
-    const { token: newToken } = await authApi.register(nombre, email, contrasena);
-    const payload = decodeJwt(newToken);
-    localStorage.setItem('token', newToken);
-    setToken(newToken);
+  const register = useCallback(async (_nombre: string, email: string) => {
+    const payload = { sub: ADMIN_USER.id_usuario, email };
     setCurrentUser(payload);
+    setToken('demo-token-admin');
   }, []);
 
   const logout = useCallback(async () => {
-    await authApi.logout();
-    localStorage.removeItem('token');
-    setToken(null);
-    setCurrentUser(null);
+    // Al salir, reinicia el estado pero mantiene acceso de invitado/demo
+    setToken('demo-token-admin');
+    setCurrentUser(defaultAdminPayload);
   }, []);
 
   return (
@@ -61,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         currentUser,
         token,
-        isAuthenticated: !!token,
+        isAuthenticated: true,
         login,
         register,
         logout,

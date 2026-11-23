@@ -1,16 +1,20 @@
 // ============================================================
-// API – Comentarios
+// API – Comentarios (respaldo en memoria RAM para Cloudflare)
 // ============================================================
 import apiClient from './client';
+import { memoryStore } from './memoryStore';
 import type { Comentario } from '../types';
 
 export const commentsApi = {
-  // POST /api/comments → crear comentario; autor sale del token
   create: async (id_tarea: string, contenido: string): Promise<Comentario> => {
-    const { data } = await apiClient.post<Comentario>('/comments', {
-      id_tarea,
-      contenido,
-    });
-    return data;
+    try {
+      const { data } = await apiClient.post<Comentario>('/comments', {
+        id_tarea,
+        contenido,
+      }, { timeout: 1500 });
+      return data;
+    } catch {
+      return memoryStore.createComment(id_tarea, contenido);
+    }
   },
 };

@@ -1,9 +1,7 @@
 // ============================================================
-// Header – cabecera global con toggle tema y cerrar sesión
+// Header – cabecera global con badge de Administrador
 // ============================================================
 import { useAuth } from '../auth/AuthContext';
-import { useToast } from '../hooks/useToast';
-import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -13,15 +11,7 @@ interface HeaderProps {
 }
 
 export function Header({ darkMode, onToggleDark, viewMode, onToggleView }: HeaderProps) {
-  const { currentUser, logout } = useAuth();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    addToast('Sesión cerrada correctamente', 'info');
-    navigate('/login');
-  };
+  const { currentUser } = useAuth();
 
   return (
     <header
@@ -32,9 +22,14 @@ export function Header({ darkMode, onToggleDark, viewMode, onToggleView }: Heade
       }}
     >
       {/* Nombre de la app */}
-      <span className="font-semibold text-base tracking-tight select-none" style={{ color: 'var(--color-text)' }}>
-        Task Manager
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="font-semibold text-base tracking-tight select-none" style={{ color: 'var(--color-text)' }}>
+          Task Manager
+        </span>
+        <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold">
+          Modo Demo / Admin
+        </span>
+      </div>
 
       {/* Espacio flexible */}
       <div className="flex-1" />
@@ -63,21 +58,18 @@ export function Header({ darkMode, onToggleDark, viewMode, onToggleView }: Heade
         {darkMode ? '☀️' : '🌙'}
       </button>
 
-      {/* Usuario actual */}
+      {/* Usuario actual / Rol Administrador */}
       {currentUser && (
-        <span className="text-sm hidden sm:block" style={{ color: 'var(--color-text-muted)' }}>
-          {currentUser.email}
-        </span>
+        <div className="flex items-center gap-1.5 hidden sm:flex">
+          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
+            Leonardo Mata
+          </span>
+          <span className="text-xs font-mono" style={{ color: 'var(--color-text-muted)' }}>
+            (Admin)
+          </span>
+        </div>
       )}
-
-      {/* Cerrar sesión */}
-      <button
-        onClick={handleLogout}
-        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600"
-        style={{ color: 'var(--color-text-muted)' }}
-      >
-        Salir
-      </button>
     </header>
   );
 }
