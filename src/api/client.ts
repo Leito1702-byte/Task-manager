@@ -1,7 +1,5 @@
 // ============================================================
 // Cliente HTTP base (axios)
-// Interceptor: añade Authorization Bearer
-// Interceptor: captura 401 y redirige a /login
 // ============================================================
 import axios from 'axios';
 
@@ -18,14 +16,10 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Response: 401 → limpiar sesión y redirigir a login
+// Response: en modo demo/cloudflare nunca forzar recarga en bucle a /login ante 401/405
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
     return Promise.reject(error);
   }
 );
